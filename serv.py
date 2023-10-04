@@ -12,9 +12,8 @@ groups = {}
 
 def handle_client(client_socket, client_address):
     try:
-        #client_socket.send("Enter your user ID: ".encode('utf-8'))
         user_id = client_socket.recv(1024).decode('utf-8')
-        #client_socket.send("Enter your group ID: ".encode('utf-8'))
+        
         group_id = client_socket.recv(1024).decode('utf-8')
 
         client_socket.send(f"Welcome to group {group_id}! You are user {user_id}.".encode('utf-8'))
@@ -27,7 +26,7 @@ def handle_client(client_socket, client_address):
             groups[group_id] = [user_id]
         else:
             groups[group_id].append(user_id)
-
+        #server side message for new user joining
         print(f"User {user_id} has joined group {group_id}", group_id, user_id)
 
         # Broadcast a message to the group that the user has joined
@@ -39,18 +38,14 @@ def handle_client(client_socket, client_address):
                 break
             if message=='/quit':
                 break
+
+            #server side record of all messages from all groups
+            print(f"{user_id}: {message} :: room {group_id}")
             # Broadcast the message to everyone in the same group
-            print(f"{user_id}: {message} : room: {group_id}")
             broadcast_message(f"User {user_id}: {message}", group_id, user_id)
     except Exception as e:
         print(f"Error: {str(e)}")
-    finally:
-        # Remove the client from the group and close the socket
-        if user_id in groups.get(group_id, []):
-            groups[group_id].remove(user_id)
-        del clients[user_id]
-        client_socket.close()
-        broadcast_message(f"User {user_id} has left group {group_id}", group_id, user_id)
+    
 
 
 def broadcast_message(message, group_id, user_id):
